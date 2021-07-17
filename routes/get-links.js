@@ -16,18 +16,35 @@ router.get('/tv', async(req, res) => {
 				args: [`--no-sandbox`]
 			})
 			const page = (await browser.pages())[0];
-			await page.goto(real)	
-			
-			const subs = await page.waitForRequest((req) => {
-				return req.url().endsWith(`.vtt`)
+			await page.goto(real, { waitUntil: 'networkidle0' })	
+
+			//scrape
+			const iframe = await page.waitForSelector('#iframe-embed');
+			const contframe = await iframe.contentFrame();
+			const script = await contframe.waitForSelector('body > script');
+			const script_text = await script.evaluateHandle(el => {
+				return el.textContent;
 			})
 
-			const vidlink = await page.waitForRequest((req) => {
-				return req.url().endsWith(`.mp4`)
-			})
+			//now we match the needed links using regex...	
+			const data = script_text._remoteObject.value.match(/\{".*?\"}/gm)
+			const items = [];
+			
+			//push data inside that stuff...
+			for (let v in data) {
+				items.push(JSON.parse(data[v]))
+			}
+			
+			//destructure for convenience...
+			const [source_1, source_2, ...subs] = items;
 
 			await browser.close()
-			res.json({ link: vidlink.url(), subtitle: subs.url() })
+
+			res.json({
+				links: [source_1, source_2],
+				subtitles: subs
+			})
+
 	} catch(e) {
 		console.log(`Error: ${e}`)	
 		res.send(`Error: ${e}`)
@@ -46,18 +63,34 @@ router.get('/movie/', async(req, res) => {
 				args: [`--no-sandbox`]
 			})
 			const page = (await browser.pages())[0];
-			await page.goto(real)	
+			await page.goto(real, { waitUntil: 'networkidle0' })	
 
-			const subs = await page.waitForRequest((req) => {
-				return req.url().endsWith(`.vtt`)
+			//scrape
+			const iframe = await page.waitForSelector('#iframe-embed');
+			const contframe = await iframe.contentFrame();
+			const script = await contframe.waitForSelector('body > script');
+			const script_text = await script.evaluateHandle(el => {
+				return el.textContent;
 			})
 
-			const vidlink = await page.waitForRequest((req) => {
-					return req.url().endsWith('.mp4')
-			})
+			//now we match the needed links using regex...	
+			const data = script_text._remoteObject.value.match(/\{".*?\"}/gm)
+			const items = [];
+			
+			//push data inside that stuff...
+			for (let v in data) {
+				items.push(JSON.parse(data[v]))
+			}
+			
+			//destructure for convenience...
+			const [source_1, source_2, ...subs] = items;
 
 			await browser.close()
-			res.json({ link: vidlink.url(), subtitle: subs.url() })
+
+			res.json({
+				links: [source_1, source_2],
+				subtitles: subs
+			})
 
 	} catch(e) {
 		console.log(`Error: ${e}`)
