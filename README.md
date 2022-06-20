@@ -1,4 +1,4 @@
-# Unnoficial Api for Himovies clones
+# Unofficial Api for Himovies clones
 
 Deploying on heroku, 
 

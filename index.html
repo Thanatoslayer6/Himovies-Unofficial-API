@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <title>Welcome</title>
+        <style type="text/css" media="screen">
+            h3, h2 {
+                background: cornsilk;
+                display: inline;
+            }
+            /* For all <code> */
+            code {
+              font-family: MyFancyCustomFont, monospace;
+              font-size: inherit;
+            }
+
+            /* Code in text */
+            p > code,
+            li > code,
+            dd > code,
+            td > code {
+              background: #ffeff0;
+              word-wrap: break-word;
+              box-decoration-break: clone;
+              padding: .1rem .3rem .2rem;
+              border-radius: .2rem;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>Himovies-Unofficial-API</h2> 
+        <p>Search for a tv-show or a movie: <code> /search/[query] </code> </p> 
+        <h3> ### MOVIES ### </h3>
+        <p>Get Movie Servers: <code> /movie/[movieId] </code> </p>
+        <h3> ### TV-SHOW ### </h3>
+        <p>Get TV Seasons:  <code> /tv/seasons/[tvId] </code> </p>
+        <p>Get TV Episodes: <code> /tv/episodes/[seasonId] </code> </p> 
+        <p>Get TV Episode servers: <code> /tv/servers/[episodeId] </code> </p> 
+        <h3> ### LINKS ### </h3>
+        <p>Get TV Episode or Movie links: <code> /links/[serverId]?href=[episodeId or movieId] <code> </p>   
+    </body>
+</html>

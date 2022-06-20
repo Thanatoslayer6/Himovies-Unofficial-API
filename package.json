@@ -1,20 +1,19 @@
 {
-  "name": "expressapp",
+  "name": "Himovies-Unofficial-Api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Himovies API scraper",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Thanatoslayer6",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^0.27.2",
     "cheerio": "^1.0.0-rc.10",
-    "dotenv": "^10.0.0",
-    "express": "^4.17.1",
-    "puppeteer": "^10.1.0"
+    "dotenv": "^16.0.1",
+    "express": "^4.17.1"
   }
 }
