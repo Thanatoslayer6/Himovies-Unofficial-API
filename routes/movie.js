@@ -6,11 +6,11 @@ const axios = require('axios').default.create({
     }
 })
 const cheerio = require('cheerio')
-
+const DOMAIN = process.env.DOMAIN || "https://2kmovie.cc"
 
 router.get('/servers/:movieId', async(req, res) => {
     try {
-        let url = `https://2kmovie.cc/ajax/movie/episodes/${req.params.movieId}`;
+        let url = `${DOMAIN}/ajax/movie/episodes/${req.params.movieId}`;
         let response = (await axios.get(url)).data;
         let $ = cheerio.load(response);
         let result = ($('a').map((i, el) => {
@@ -22,8 +22,8 @@ router.get('/servers/:movieId', async(req, res) => {
         })).get()
         res.json(result)
     } catch (e) {
-        console.error(e)
         res.send(e)
+        throw Error(e)
     }
 })
 

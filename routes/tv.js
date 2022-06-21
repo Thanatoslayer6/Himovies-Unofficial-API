@@ -6,14 +6,14 @@ const axios = require('axios').default.create({
     }
 })
 const cheerio = require('cheerio')
-
+const DOMAIN = process.env.DOMAIN || "https://2kmovie.cc"
 const getCheerioData = async (link) => {
     return cheerio.load((await axios.get(link)).data)
 }
 
 router.get('/seasons/:tvId', async (req, res) => {
     try {
-        let $ = await getCheerioData(`https://2kmovie.cc/ajax/v2/tv/seasons/${req.params.tvId}`)
+        let $ = await getCheerioData(`${DOMAIN}/ajax/v2/tv/seasons/${req.params.tvId}`)
         let result =  ($('a').map((i, el) => {
             return {
                 seasonName: $(el).text().trim() || null,
@@ -22,30 +22,30 @@ router.get('/seasons/:tvId', async (req, res) => {
         })).get()
         res.json(result)
     } catch (e) {
-        console.error(e)
         res.send(e)
+        throw Error(e)
     }
 })
 
 router.get('/episodes/:seasonId', async (req, res) => {
     try {
-        let $ = await getCheerioData(`https://2kmovie.cc/ajax/v2/season/episodes/${req.params.seasonId}`)
+        let $ = await getCheerioData(`${DOMAIN}/ajax/v2/season/episodes/${req.params.seasonId}`)
         let result = ($('.eps-item').map((i, el) => {
             return {
-                episodeName: $(el).attr('title') || null,
+                episodeName: $(el).attr('title') || $(el).find('.film-poster-img').attr('title'),
                 episodeId: $(el).attr('data-id') || null,
             }
         })).get()
         res.json(result)
     } catch (e) {
-        console.error(e)
         res.send(e)
+        throw Error(e)
     }
 })
 
 router.get('/servers/:episodeId', async (req, res) => {
     try {
-        let $ = await getCheerioData(`https://2kmovie.cc/ajax/v2/episode/servers/${req.params.episodeId}`)
+        let $ = await getCheerioData(`${DOMAIN}/ajax/v2/episode/servers/${req.params.episodeId}`)
         let result = ($('a').map((i, el) => {
             return {
                 server: $(el).find('span').text() || null,
@@ -55,8 +55,8 @@ router.get('/servers/:episodeId', async (req, res) => {
         })).get()
         res.json(result)
     } catch (e) {
-        console.error(e)
         res.send(e)
+        throw Error(e)
     }
 })
 

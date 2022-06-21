@@ -6,6 +6,7 @@ const axios = require('axios').default.create({
     }
 })
 const cheerio = require('cheerio')
+const DOMAIN = process.env.DOMAIN || "https://2kmovie.cc"
 
 router.get('/', (req, res) => {
 	res.send('<h3>Search instructions...</h3><p>TV-SHOWS - /search/tv/[query]</p><p>MOVIES - /search/movie/[query]</p>')
@@ -13,7 +14,7 @@ router.get('/', (req, res) => {
 
 router.get('/:query', async(req, res) => {
     try {
-        let url = `https://2kmovie.cc/search/${req.params.query.replace(/\s/g,'-')}`
+        let url = `${DOMAIN}/search/${req.params.query.replace(/\s/g,'-')}`
         let response = (await axios.get(url)).data;
         let $ = cheerio.load(response);
         let result = ($('.film-detail').map((i, el) => {
@@ -23,7 +24,7 @@ router.get('/:query', async(req, res) => {
                     type: "movie",
                     href: $(el).find('.film-name a').attr('href'),
                     id: $(el).find('.film-name a').attr('href').split('-').pop(),
-                    info: $(el).find('.fd-infor').text()
+                    info: $(el).find('.fd-infor').text().trim()
                 }
             } else {
                 return {
@@ -31,14 +32,14 @@ router.get('/:query', async(req, res) => {
                     type: "tv",
                     href: $(el).find('.film-name a').attr('href'),
                     id: $(el).find('.film-name a').attr('href').split('-').pop(),
-                    info: $(el).find('.fd-infor').text()
+                    info: $(el).find('.fd-infor').text().trim()
                 }
             }
         })).get()
         res.json(result)
     } catch(e) {
-        console.error(e)
         res.send(e)
+        throw Error(e)
     }
 })
 
