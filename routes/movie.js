@@ -16,7 +16,7 @@ router.get('/servers/:movieId', async(req, res) => {
         let result = ($('a').map((i, el) => {
             return {
                 server: $(el).find('span').text() || null,
-                serverId: $(el).attr('data-linkid') || null,
+                serverId: $(el).attr('data-linkid') || $(el).attr('data-id'),
                 slug: $(el).attr('id') || null,
             }
         })).get()
