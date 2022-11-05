@@ -1,4 +1,5 @@
 const express = require('express')
+const CryptoJS = require('crypto-js')
 const router = express.Router()
 const axios = require('axios').default
 const cheerio = require('cheerio')
@@ -61,24 +62,48 @@ class Recaptcha {
 
     async iframeInfo() {
         try {
-            let info = await this.client.get(`${DOMAIN}/ajax/get_link/${this.serverId}?_token=${this.RecaptchaToken}`, { 
+            // let info = await this.client.get(`${DOMAIN}/ajax/get_link/${this.serverId}?_token=${this.RecaptchaToken}`, { 
+            //     headers: { 
+            //         "Referer": this.watchURL
+            //     } 
+            // })
+            let info = await this.client.get(`${DOMAIN}/ajax/sources/${this.serverId}`, { 
                 headers: { 
                     "Referer": this.watchURL
                 } 
             })
             let URL = info.data.link // e.x https://mzzcloud.life/embed-4/25kKV67FpxEH?z=
-            let resp =  (await this.client.get(URL, { 
-                headers: { 
-                    "Referer": DOMAIN
-                } 
-            })).data
+            // let resp =  (await this.client.get(URL, { 
+            //     headers: { 
+            //         "Referer": DOMAIN
+            //     } 
+            // })).data
             // Setup needed variables for getting sources
-            this.RecaptchaNumber = new RegExp(/recaptchaNumber = '(.*?)'/gm).exec(resp)[1],
+            // this.RecaptchaNumber = new RegExp(/recaptchaNumber = '(.*?)'/gm).exec(resp)[1],
             this.iframeURL = URL.substring(0, URL.lastIndexOf('/'))
             this.iframeId = URL.substring(URL.lastIndexOf('/') + 1, URL.lastIndexOf('?'))
         } catch (e) {
             throw new Error("iframeInfo Error")
         }
+    }
+}
+
+// Added this method to decrypt sources
+const decryptSource = async (encryptedSource) => {
+    // There are 2 keys possible, just try them all
+    try { // Dokicloud
+        let decryptionKey = (await axios.get('https://raw.githubusercontent.com/consumet/rapidclown/dokicloud/key.txt')).data
+        let bytes = CryptoJS.AES.decrypt(encryptedSource, decryptionKey);
+        return (JSON.parse(bytes.toString(CryptoJS.enc.Utf8)));
+    } catch(e) {
+        console.log("Dokicloud key failed to decrypt source")
+    }
+    try { // Rabbitstream
+        let decryptionKey = (await axios.get('https://raw.githubusercontent.com/consumet/rapidclown/rabbitstream/key.txt')).data
+        let bytes = CryptoJS.AES.decrypt(encryptedSource, decryptionKey);
+        return (JSON.parse(bytes.toString(CryptoJS.enc.Utf8)));
+    } catch (e) {
+        console.log("Rabbitstream key failed to decrypt source")
     }
 }
 
@@ -89,12 +114,13 @@ router.get('/:serverId', async (req, res) => {
         }
         let test = new Recaptcha(req.query.href, req.params.serverId)
         // SETUP RECAPTCHA AND NEEDED VARIABLES
-        await test.getRecaptchaKey()
-        await test.getVToken();
-        await test.getRecaptchaToken()
+        // await test.getRecaptchaKey()
+        // await test.getVToken();
+        // await test.getRecaptchaToken()
         await test.iframeInfo();
         // END
-        const properURL = (test.iframeURL.replace('/embed', '/ajax/embed')) + `/getSources?id=${test.iframeId}&_token=${test.RecaptchaToken}&_number=${test.RecaptchaNumber}`
+        // const properURL = (test.iframeURL.replace('/embed', '/ajax/embed')) + `/getSources?id=${test.iframeId}&_token=${test.RecaptchaToken}&_number=${test.RecaptchaNumber}`
+        const properURL = (test.iframeURL.replace('/embed', '/ajax/embed')) + `/getSources?id=${test.iframeId}`
         const result = (await test.client.get(properURL, {
             headers: {
                 "Referer": DOMAIN,
@@ -105,6 +131,8 @@ router.get('/:serverId', async (req, res) => {
                 "TE": "trailers"
             }
         })).data
+        // Assign the decrypted data into the original result
+        result.sources = await decryptSource(result.sources)
         res.json(result)
     } catch (e) {
         res.send(e)
