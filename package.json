@@ -1,9 +1,10 @@
 {
   "name": "Himovies-Unofficial-Api",
-  "version": "1.0.0",
+  "version": "1.4.0",
   "description": "Himovies API scraper",
   "main": "index.js",
   "scripts": {
+    "upgradeDependencies": "yarn upgrade-interactive --latest",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
   },
@@ -11,10 +12,10 @@
   "author": "Thanatoslayer6",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.27.2",
-    "cheerio": "^1.0.0-rc.10",
+    "axios": "^1.4.0",
+    "cheerio": "^1.0.0-rc.12",
     "crypto-js": "^4.1.1",
-    "dotenv": "^16.0.1",
-    "express": "^4.17.1"
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2"
   }
 }

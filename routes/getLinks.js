@@ -90,6 +90,7 @@ class Recaptcha {
 
 // Added this method to decrypt sources
 const decryptSource = async (encryptedSource) => {
+    /*
     // There are 2 keys possible, just try them all
     try { // Dokicloud
         let decryptionKey = (await axios.get('https://raw.githubusercontent.com/consumet/rapidclown/dokicloud/key.txt')).data
@@ -105,6 +106,40 @@ const decryptSource = async (encryptedSource) => {
     } catch (e) {
         console.log("Rabbitstream key failed to decrypt source")
     }
+    */
+
+    let result = null;
+    
+    const keyUrls = { // Links for getting the key
+        Dokicloud: 'https://raw.githubusercontent.com/enimax-anime/key/e4/key.txt',
+        Main: 'https://raw.githubusercontent.com/enimax-anime/key/e6/key.txt',
+        Rabbitstream: 'https://raw.githubusercontent.com/enimax-anime/key/e0/key.txt'
+    }
+    
+    for (let [provider, key] of Object.entries(keyUrls)) {
+        try { 
+            let encryptedSourceTemp = encryptedSource.split("");
+            let actualDecryptionKey = "";
+            // First grab the key then assign it into some variable
+            let decryptionKey = (await axios.get(key)).data
+            for (const index of decryptionKey) {
+                for (let i = index[0]; i < index[1]; i++) {
+                    actualDecryptionKey += encryptedSourceTemp[i];
+                    encryptedSourceTemp[i] = null;
+                }
+            }
+            let encryptedURL = encryptedSourceTemp.filter((x) => x !== null).join("");
+            result = JSON.parse(CryptoJS.AES.decrypt(encryptedURL, actualDecryptionKey).toString(CryptoJS.enc.Utf8));
+            if (result) break;
+        } catch(e) {
+            console.log(`${provider} key failed to decrypt source, trying next one(?)`)
+        }
+    }
+    
+    return result;
+
+
+
 }
 
 router.get('/:serverId', async (req, res) => {
