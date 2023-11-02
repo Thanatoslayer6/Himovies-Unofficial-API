@@ -179,3 +179,4 @@ router.get('/:serverId', async (req, res) => {
 module.exports = router
 // for example = /links/[serverId]?href=[tv-url]
 // another one = /links/[serverId]?href=[movie-url]
+// can decrypt content from api please change key 
